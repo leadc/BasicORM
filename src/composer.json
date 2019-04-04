@@ -1,0 +1,22 @@
+{
+    "name": "BasicORM",
+    "type": "library",
+    "version": "1.0.0",
+    "description": "BasicORM is a very simple ORM for PHP",
+    "keywords": ["framework", "orm", "simple", "database", "json", "mapping"],
+    "homepage": "https://leadc.com",
+    "license": "MIT",
+    "authors": [{
+        "name": "Leandro Cáceres",
+        "email": "leandrodamian@hotmail.com",
+        "homepage": "https://leadc.com"
+    }],
+    "require": {
+        "php": ">=5.5.0"
+    },
+    "require-dev": {},
+    "provide": {},
+    "autoload": {
+        "psr-4": { "BasicORM\\": "src/" }
+    }
+}

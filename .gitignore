@@ -1,0 +1,2 @@
+# Ignore the real connection classes
+src/BORMConnections/*Connection.php

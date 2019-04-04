@@ -112,10 +112,12 @@
         }
 
         /**
-         * 
+         * Verifica si una matrícula tiene un aval pendiente y devuelve los resultados en caso de tenerlo
          */
         public function MatriculaConAval($matricula){
-             return $this->SQLJoin([],[],[]);
+             return $this->SQLJoin([$this->mapping->dbTable.".PENDIENTE = 'S'"],
+                                    [],
+                                    ["INNER JOIN VEHICULOSAVALES ON VEHICULOSAVALES.ID_VEHICULO = ".$this->mapping->dbTable.".ID_VEHICULO AND VEHICULOSAVALES.PATENTE = '$matricula'"]);
         }
 
     }

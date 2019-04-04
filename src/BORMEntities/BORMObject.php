@@ -37,9 +37,12 @@
     class BORMObject{
         // Mapping BD
         protected $mapping = null;
-        // Formato de fecha
+        // date format
         protected $dateFormat = 'YYYY-MM-DD HH24:MI:SS';
+        // Route to the connection class
         private static $ORMConnections="\\BasicORM\\BORMConnections\\";
+
+        // Constructor
         function __construct($map = null){
             // If exist, set the mapping structure
             if($map != null) {
@@ -81,7 +84,7 @@
             // Join tables
             $joinString = "";
             for($i=0;$i<count($join);$i++){
-                $joinString = $joinString + $join[$i];
+                $joinString = $joinString . $join[$i];
             }
 
             // Conditions
@@ -121,24 +124,24 @@
          * Executes a query making the joins in $join and return the results
          */
         protected function SQLJoin($filters = [], $order = [], $join = []){
-             // Creates a select statement
-             $sql = $this->SQLSelect($filters, $order, $join);
-             // Executes the query
-             $resultado = (self::$ORMConnections.$this->mapping->dbConnectionClass)::Query($sql);
-             // Returns the results
-             return $this->CreateFromQueryResult($resultado);
+            // Creates a select statement
+            $sql = $this->SQLSelect($filters, $order, $join);
+            // echo $sql;
+            // Executes the query
+            $resultado = (self::$ORMConnections.$this->mapping->dbConnectionClass)::Query($sql);
+            // Returns the results
+            return $this->CreateFromQueryResult($resultado);
 
         }
 
         /** InsertSQL
-         * Genera el sql necesario para insertar un nuevo registro en la base de datos
-         * Ejecuta la consulta y devuelve true en caso de haber insertado correctamente o false en caso de no haber insertado
-         * En caso de error lanza una excepción con la descripción del mismo
+         * Generates the statement to make an insert in the table with the values in the current object
+         * Returns the number of rows inserted
          */
         protected function InsertSQL(){
-            // Inserto la tabla en la sentencia SQL
+            // SQL Statement
             $sql = "INSERT INTO ".$this->mapping->dbTable;
-            //Recorro los valores que debo insertar del mapping
+            // Values in the object
             $insertFields = "";
             $fieldValues = "";
             foreach ($this->mapping->attributes as $key => $value) {
@@ -159,11 +162,15 @@
             }
             $sql = $sql." ($insertFields) VALUES ($fieldValues)";
             //echo $sql;
+            // Executes the statement
             $result = (self::$ORMConnections.$this->mapping->dbConnectionClass)::ExecNonQuery($sql);
-            // Devuelvo la cantidad de filas afectadas
+            // Returns the number of rows affected
             return $result;
         }
 
+        /** Max
+         * Returns the max value in $field
+         */
         protected function Max($field){
             return (self::$ORMConnections.$this->mapping->dbConnectionClass)::MaxId($field, $this->mapping->dbTable);
         }

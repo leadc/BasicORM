@@ -1,6 +1,7 @@
 <?php
     namespace BasicORM\BORMEntities;
-
+    use BasicORM\LOGS\Log;
+    
     // Field data type Defines
     define('CAMPO_NUMERICO',"NUMERIC");
     define('CAMPO_CADENA',"STRING");
@@ -56,6 +57,7 @@
         protected function FindBy($filters = [], $order = []){
             // Creates a select statement
             $sql = $this->SQLSelect($filters, $order);
+            // Log::WriteLog(MAIN_LOG,$sql);
             // Executes the query
             $resultado = (self::$ORMConnections.$this->mapping->dbConnectionClass)::Query($sql);
             // Returns the results
@@ -116,7 +118,7 @@
             }
             // Select Statement
             $sql = "SELECT $fields FROM $table $joinString $where $orderString";
-            //echo $sql;
+            //Log::WriteLog("LogMediciones.txt",[$sql]);
             return $sql;
         }
 
@@ -146,22 +148,33 @@
             $fieldValues = "";
             foreach ($this->mapping->attributes as $key => $value) {
                 if($value->onInsert == "INSERT"){
+                    //Log::WriteLog(MAIN_LOG, ["$key -> ".$this->$key]);
                     // Fields to insert
                     if($insertFields == ""){
                         $insertFields = $insertFields . $value->fiedlName;
                     }else{
                         $insertFields = $insertFields . ", " . $value->fiedlName;
                     }
-                    // Values to insert
-                    if($fieldValues == ""){
-                        $fieldValues = $fieldValues . "'" . $this->$key . "'";
+
+                    // Set comma ? 
+                    if($fieldValues != ""){
+                        $fieldValues = $fieldValues . ", ";
+                    }
+                    // Use quotes ?
+                    $quote = "'";
+                    if($value->type == "NUMERIC"){
+                        $quote = "";
+                    }
+                    // Evaluates the current value
+                    if(is_null($this->$key)){
+                        $fieldValues = $fieldValues . " null";
                     }else{
-                        $fieldValues = $fieldValues . ", '" . $this->$key . "'";
+                        $fieldValues = $fieldValues . "$quote" . $this->$key . "$quote";
                     }
                 }
             }
             $sql = $sql." ($insertFields) VALUES ($fieldValues)";
-            //echo $sql;
+            //Log::WriteLog(MAIN_LOG, [$sql]);
             // Executes the statement
             $result = (self::$ORMConnections.$this->mapping->dbConnectionClass)::ExecNonQuery($sql);
             // Returns the number of rows affected
@@ -187,11 +200,17 @@
             // Fields String to include in select statement
             $fields = "";
             foreach ($this->mapping->attributes as $key => $value) {
-                if($value->onUpdate == "UPDATE"){
-                    if($fields == ""){
-                        $fields = $fields . $this->mapping->dbTable.".".$value->fiedlName . " = '" . $this->$key ."'";
+                // Log::WriteLog(MAIN_LOG, ["$key -> ".$this->$key]);
+                if(!is_null($this->$key) && $value->onUpdate == "UPDATE"){
+
+                    if($fields != ""){
+                        $fields = $fields .", ";
+                    }
+
+                    if($value->type == "NUMERIC"){
+                        $fields = $fields . $this->mapping->dbTable.".".$value->fiedlName . " = " . $this->$key ."";
                     }else{
-                        $fields = $fields .", ". $this->mapping->dbTable.".".$value->fiedlName . " = '" . $this->$key ."'";
+                        $fields = $fields . $this->mapping->dbTable.".".$value->fiedlName . " = '" . $this->$key ."'";
                     }
                 }
             }
